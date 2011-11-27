@@ -2,7 +2,7 @@
 /*global window: false, readConvertLinksToFootnotes: false, readStyle: false, readSize: false, readMargin: false, Typekit: false, ActiveXObject: false */
 
 var dbg = (typeof console !== 'undefined') ? function(s) {
-    //console.log("Readability: " + s);
+//    console.log("Readability: " + s);
 } : function() {};
 
 
@@ -78,7 +78,7 @@ var readability = {
      *
      * @return void
      **/
-    init: function() {
+    init: function() {      
         /* Before we do anything, remove all scripts that are not readability. */
         window.onload = window.onunload = function() {};
         readConvertLinksToFootnotes = false;
@@ -86,24 +86,21 @@ var readability = {
         readSize    = readability.sizeClass;
         readMargin  = readability.marginClass;
         readStyle   = readability.styleClass;
-
-        console.log('readSize: ',readability, readability.sizeClass);
-
         
         readability.removeScripts(document);
 
         if(document.body && !readability.bodyCache) {
             readability.bodyCache = document.body.innerHTML;
-
         }
         /* Make sure this document is added to the list of parsed pages first, so we don't double up on the first page */
         readability.parsedPages[window.location.href.replace(/\/$/, '')] = true;
 
         /* Pull out any possible next page link first */
         var nextPageLink = readability.findNextPageLink(document.body);
-        
-        readability.prepDocument();
 
+        readability.prepDocument();
+        
+        
         /* Build readability's DOM tree */
         var overlay        = document.createElement("DIV");
         var innerDiv       = document.createElement("DIV");
@@ -131,12 +128,8 @@ var readability = {
         document.body.className = readStyle;
         document.dir            = readability.getSuggestedDirection(articleTitle.innerHTML);
 
-        if (readStyle === "style-athelas" || readStyle === "style-apertura"){
-            overlay.className = readStyle + " rdbTypekit";
-        }
-        else {
-            overlay.className = readStyle;
-        }
+        overlay.className = readStyle;
+
         innerDiv.className    = readMargin + " " + readSize;
 
         if(typeof(readConvertLinksToFootnotes) !== 'undefined' && readConvertLinksToFootnotes === true) {
@@ -180,10 +173,6 @@ var readability = {
 
         window.scrollTo(0, 0);
 
-        /* If we're using the Typekit library, select the font */
-        if (readStyle === "style-athelas" || readStyle === "style-apertura") {
-            readability.useRdbTypekit();
-        }
 
         if (nextPageLink) {
             /** 
@@ -194,6 +183,11 @@ var readability = {
                 readability.appendNextPage(nextPageLink);
             }, 500);
         }
+        
+        
+        window.setTimeout(function() {
+          articleTools.classList.remove('hover');
+        }, 2000)
 
         /** Smooth scrolling **/
         document.onkeydown = function(e) {
@@ -285,7 +279,7 @@ var readability = {
             
             "<a href='#' onclick='javascript:window.print();' title='Print page' id='print-page'>Print Page</a>" ;
             //"<a href='#' onclick='readability.emailBox(); return false;' title='Email page' id='email-page'>Email Page</a>";
-
+        articleTools.classList.add('hover');
         return articleTools;
     },
 
@@ -395,8 +389,6 @@ var readability = {
                  "<a href='http://jblanche.github.com/Enjoy-Reading' id='enjoyreading-logo'>Enjoy Reading</a>",
                  "<span id='enjoyreading-based'>&nbsp;is heavily based on&nbsp;</span>",
                  "<a href='http://lab.arc90.com/experiments/readability' id='readability-logo'>Readability &mdash;&nbsp;</a>",
-                 "<a href='http://www.arc90.com/' id='arc90-logo'> An Arc90 Laboratory Experiment&nbsp;</a>",
-                 " <span id='readability-url'> http://lab.arc90.com/experiments/readability</span>",
              "</div>",
              "<div id='rdb-footer-right'>",
                  "<span class='version'>Readability version " + readability.version + "</span>",
@@ -570,63 +562,6 @@ var readability = {
         }
     },
 
-    useRdbTypekit: function () {
-        var rdbHead      = document.getElementsByTagName('head')[0];
-        var rdbTKScript  = document.createElement('script');
-        var rdbTKCode    = null;
-
-        var rdbTKLink    = document.createElement('a');
-            rdbTKLink.setAttribute('class','rdbTK-powered');
-            rdbTKLink.setAttribute('title','Fonts by Typekit');
-            rdbTKLink.innerHTML = "Fonts by <span class='rdbTK'>Typekit</span>";
-
-        if (readStyle === "style-athelas") {
-            rdbTKCode = "sxt6vzy";
-            dbg("Using Athelas Theme");
-
-            rdbTKLink.setAttribute('href','http://typekit.com/?utm_source=readability&utm_medium=affiliate&utm_campaign=athelas');
-            rdbTKLink.setAttribute('id','rdb-athelas');
-            document.getElementById("rdb-footer-right").appendChild(rdbTKLink);
-        }
-        if (readStyle === "style-apertura") {
-            rdbTKCode = "bae8ybu";
-            dbg("Using Inverse Theme");
-
-            rdbTKLink.setAttribute('href','http://typekit.com/?utm_source=readability&utm_medium=affiliate&utm_campaign=inverse');
-            rdbTKLink.setAttribute('id','rdb-inverse');
-            document.getElementById("rdb-footer-right").appendChild(rdbTKLink);
-        }
-
-        /**
-         * Setting new script tag attributes to pull Typekits libraries
-        **/
-        rdbTKScript.setAttribute('type','text/javascript');
-        rdbTKScript.setAttribute('src',"http://use.typekit.com/" + rdbTKCode + ".js");
-        rdbTKScript.setAttribute('charset','UTF-8');
-        rdbHead.appendChild(rdbTKScript);
-
-        /**
-         * In the future, maybe try using the following experimental Callback function?:
-         * http://gist.github.com/192350
-         * &
-         * http://getsatisfaction.com/typekit/topics/support_a_pre_and_post_load_callback_function
-        **/
-        var typekitLoader = function() {
-            dbg("Looking for Typekit.");
-            if(typeof Typekit !== "undefined") {
-                try {
-                    dbg("Caught typekit");
-                    Typekit.load();
-                    clearInterval(window.typekitInterval);
-                } catch(e) {
-                    dbg("Typekit error: " + e);
-                }
-            }
-        };
-
-        window.typekitInterval = window.setInterval(typekitLoader, 100);
-    },
-
     /**
      * Prepare the article node for display. Clean out any inline styles,
      * iframes, forms, strip extraneous <p> tags, etc.
@@ -733,15 +668,17 @@ var readability = {
      * @return Element
     **/
     grabArticle: function (page) {
+      
+      
         var stripUnlikelyCandidates = readability.flagIsActive(readability.FLAG_STRIP_UNLIKELYS),
             isPaging = (page !== null) ? true: false;
 
         page = page ? page : document.body;
 
         var pageCacheHtml = page.innerHTML;
-
+        
         var allElements = page.getElementsByTagName('*');
-
+        
         /**
          * First, node prepping. Trash nodes that look cruddy (like ones with the class name "comment", etc), and turn divs
          * into P tags where they have been used inappropriately (as in, where they contain no other block level elements.)
@@ -805,7 +742,7 @@ var readability = {
                 }
             } 
         }
-
+        
         /**
          * Loop through all paragraphs, and assign a score to them based on how content-y they look.
          * Then add their score to their parent node.
@@ -1254,6 +1191,12 @@ var readability = {
             if(linkHref.indexOf(articleBaseUrl) !== 0) {
                 linkObj.score -= 25;
             }
+            
+            /* If the link contains comment, it is probably a comment pagination link  */
+            if(linkHref.match(/comment/)) {
+              linkObj.score -= 60; 
+            }
+            
 
             var linkData = linkText + ' ' + link.className + ' ' + link.id;
             if(linkData.match(readability.regexps.nextLink)) {
@@ -1303,6 +1246,13 @@ var readability = {
             if (linkHref.match(/p(a|g|ag)?(e|ing|ination)?(=|\/)[0-9]{1,2}/i) || linkHref.match(/(page|paging)/i)) {
                 linkObj.score += 25;
             }
+
+
+            /* If the leftovers of the URL after removing the base URL contains only a digit, there are good chances it is a pagination. */
+            if(linkHrefLeftover.match(/^(\/)?\d$/)) {
+              linkObj.score += 25;
+            }
+
 
             /* If the URL contains negative values, give a slight decrease. */
             if (linkHref.match(readability.regexps.extraneous)) {
@@ -1846,11 +1796,10 @@ var readability = {
     
 };
 
-//readability.init();
-console.debug(self.port);
 
 self.port.on('init', function(){
   readability.init();
+  window.focus() ;
 });
 
 self.port.on('click', function(opts){

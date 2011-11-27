@@ -1,1 +1,2 @@
-* remove Typekit calls.
+* Loader during readability parsing.
+* Release ! ! ! 
