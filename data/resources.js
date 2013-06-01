@@ -9,7 +9,6 @@ var $$ = document.querySelectorAll ;
 var listenForKeystroke = function(){
   var listener = window.addEventListener("keyup", function(event){
     if(event.keyCode === 27){ //ESCAPE KEY
-      console.log('ESCAPE');
       window.location.reload();
     }
   });
@@ -134,7 +133,6 @@ self.port.on('click', function(urls) {
     window.addEventListener("click", function(event){
       switch(event.target.id){
         case 'augment-size':
-          console.log('augmentSize');
           augmentSize();
           break;
         case 'reduce-size':

@@ -1,9 +1,10 @@
 {
-    "name": "enjoyreading2", 
-    "license": "MPL 1.1/GPL 2.0/LGPL 2.1", 
-    "author": "", 
-    "version": "0.1", 
-    "fullName": "EnjoyReading2", 
-    "id": "jid1-gqVyyofwCnRTSA", 
-    "description": "a basic add-on"
+    "name": "enjoyreading",
+    "license": "MPL 1.1/GPL 2.0/LGPL 2.1",
+    "author": "Jonathan Blanchet",
+    "version": "1.0.1",
+    "fullName": "Enjoy Reading",
+    "icon": "logo.png",
+    "id": "enjoyreading@jblanche.fr",
+    "description": "Improve the readability of your favorites websites and get the best online reading experience."
 }
